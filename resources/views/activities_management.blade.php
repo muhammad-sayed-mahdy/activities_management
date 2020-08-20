@@ -58,51 +58,79 @@ body {font-size:16px;}
   </div>
 
   <!-- Table -->
-<button class="button button1">Save Draft</button>    <!-- to can re-edite the activity and timer stop -->
-<button class="button button2" id="start" onclick="change()">Start Activity</button> <!-- start timer again -->
-<button class="button button3">End Activity</button> <!-- end timer and close activity, edite not allowed -->
-<button class="button button4">End Task</button> <!-- add new activity for this task id not allowed -->
-<button class="add_delete"><i class="fa fa-fw fa-plus"></i>New Activity</button> <!-- add new activity for same task id -->
-<button class="add_delete" onclick="showAndHide()"><i class="fa fa-fw fa-exchange"></i>Change Activity</button> <!-- view or edite actvity -->
+<button class="button button1 disabled" disabled form="activity_inputs" id="saveButton">Save Draft</button>    <!-- to can re-edite the activity and timer stop -->
+<button class="button button2 disabled" disabled id="startButton" onclick="change()">Start Activity</button> <!-- start timer again -->
+<button class="button button3 disabled" disabled id="endActivityButton">End Activity</button> <!-- end timer and close activity, edite not allowed -->
+<button class="button button4 disabled" disabled id="endTaskButton">End Task</button> <!-- add new activity for this task id not allowed -->
+<button class="add_delete" id="newActivityButton" form="new_activity"><i class="fa fa-fw fa-plus"></i>New Activity</button> <!-- add new activity for same task id -->
+<button class="add_delete" id="changeActivityButton" onclick="showAndHide()"><i class="fa fa-fw fa-exchange"></i>Change Activity</button> <!-- view or edite actvity -->
 
 <!-- lists -->
 <div id="show_hide" style="display:none;">
-	<select class="cars car" id="cars" size=4>
-	  <option value="volvo" class="cars" disabled selected>Choose Activity:</option>
-	  <option value="saab" class="cars">Code Activity-Title</option>
-	  <option value="opel" class="cars">Code Activity-Title</option>
-	  <option value="audi" class="cars">Code Activity-Title</option>
+	<select class="cars car" id="change_activity" form="activity_inputs" name="id" size=4>
+    <option value="" class="cars" disabled selected>Choose Activity:</option>
+    @foreach ($activities as $activity)
+      <option value="{{$activity->id}}" class="cars">{{$activity->id}} {{$activity->title}}</option>  
+    @endforeach
 	</select>
 </div>
 
+@error('id')
+    <p class="is_danger">You must select a valid activity</p>
+@enderror
+
+@error('activity')
+  <p class="is_danger">{{$message}}</p>
+@enderror
+
   <div>
       <h3>Select Task</h3>
-    <select class="mm">
-      <option value="" disabled selected class="mm">Choose your task</option>
-      <option value="1" class="mm">Code1 Task-Title</option>
-      <option value="2" class="mm">Code2 Task-Title</option>
-      <option value="3" class="mm">Code3 Task-Title</option>
+      @error('task_id')
+          <p class="is_danger">{{ $message }}</p>
+      @enderror
+    <select class="mm" form="activity_inputs" id="task_id" name="task_id">
+      <option value="" disabled selected class="mm" id="default_task">Choose your task</option>
+      @foreach ($tasks as $task)
+        <option value="{{$task->id}}" id="task_{{$task->id}}" class="cars">{{$task->id}} {{$task->title}}</option>  
+      @endforeach
     </select>
   </div>
 
     <div>
       <h3>Select Customer</h3>
-    <select class="mm">
-      <option value="" disabled selected class="mm">Choose your customer</option>
-      <option value="1" class="mm">Code1 Customer-Name</option>
-      <option value="2" class="mm">Code2 Customer-Name</option>
-      <option value="3" class="mm">Code3 Customer-Name</option>
+      @error('customer_id')
+          <p class="is_danger">{{ $message }}</p>
+      @enderror
+    <select class="mm" form="activity_inputs" id="customer_id" name="customer_id">
+      <option value="" disabled selected class="mm" id="default_customer">Choose your customer</option>
+      @foreach ($customers as $customer)
+        <option value="{{$customer->id}}" id="customer_{{$customer->id}}" class="cars">{{$customer->id}} {{$customer->name}}</option>  
+      @endforeach
     </select>
   </div>
 
+  <form action="/" method="POST" id="new_activity">
+    @csrf
+  </form>
 
- <form>
-  <h3 for="fname" >Activity Title</h3>
-  <input type="text" id="fname" name="fname" style="width:65%;height:50px;">
-  <h3 for="lname">Activity Description</h3>
-  <textarea  id="lname" name="lname" class="textArea"></textarea>
-  <h3 for="lname">Activity Points</h3>
-  <textarea  id="lname" name="lname" class="textArea"></textarea>
+ <form action="/" method="POST" id="activity_inputs">
+  @csrf
+  @method('PUT')
+  <h3 for="title" >Activity Title</h3>
+  @error('title')
+          <p class="is_danger">{{ $message }}</p>
+  @enderror
+  <input type="text" id="title" name="title" style="width:65%;height:50px;">
+  <h3 for="description">Activity Description</h3>
+  @error('description')
+          <p class="is_danger">{{ $message }}</p>
+  @enderror
+  <textarea  id="description" name="description" class="textArea"></textarea>
+  <h3 for="points">Activity Points</h3>
+  @error('points')
+          <p class="is_danger">{{ $message }}</p>
+  @enderror
+  <textarea  id="points" name="points" class="textArea"></textarea>
 </form>
 
 <div style="margin-top:20px;padding-right:58px">
@@ -125,60 +153,6 @@ body {font-size:16px;}
 
 </body>
 
-<script type = "text/JavaScript">
-// Script to open and close sidebar
-function w3_open() {
-  document.getElementById("mySidebar").style.display = "block";
-  document.getElementById("myOverlay").style.display = "block";
-}
-
-function w3_close() {
-  document.getElementById("mySidebar").style.display = "none";
-  document.getElementById("myOverlay").style.display = "none";
-}
-
-// Modal Image Gallery
-function onClick(element) {
-  document.getElementById("img01").src = element.src;
-  document.getElementById("modal01").style.display = "block";
-  var captionText = document.getElementById("caption");
-  captionText.innerHTML = element.alt;
-}
-
-function selectedRow(){
-
-                var index,
-                    table = document.getElementById("main");
-
-                for(var i = 1; i < table.rows.length; i++)
-                {
-                    table.rows[i].onclick = function()
-                    {
-                         // remove the background from the previous selected row
-                        if(typeof index !== "undefined"){
-                           table.rows[index].classList.toggle("selected");
-                        }
-                        console.log(typeof index);
-                        // get the selected row index
-                        index = this.rowIndex;
-                        // add class selected to the row
-                        this.classList.toggle("selected");
-                        console.log(typeof index);
-                     };
-                }
-
-            }
-selectedRow();
-
-function showAndHide() {
-  var x = document.getElementById("show_hide");
-  if (x.style.display === "none") {
-    x.style.display = "block";
-  } else {
-    x.style.display = "none";
-  }
-}
-
-</script>
+<script type = "text/JavaScript" src="{{url('js/app.js')}}"></script>
 
 </html>

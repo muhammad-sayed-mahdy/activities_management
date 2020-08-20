@@ -1,5 +1,6 @@
 <?php
 
+use App\Activity;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('activities_management');
-});
+Route::get('/', 'ActivityController@show');
+
+Route::post('/', 'ActivityController@store');
+
+Route::put('/', 'ActivityController@update');

@@ -66,6 +66,11 @@
 .button3 {background-color: #f44336;} /* Red */
 .button4 {background-color: #555555;} /* black */
 
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .add_delete{
   float: right;
   text-align: center;
@@ -114,4 +119,8 @@
 .textArea{
     width:65%;
     height:200px;
+}
+
+.is_danger {
+  color: red;
 }
