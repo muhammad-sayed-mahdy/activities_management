@@ -57,14 +57,15 @@ body {font-size:16px;}
   <div class="w3-container" style="margin-top:80px" id="showcase">
     <h1 class="w3-jumbo"><b>Activities Management</b></h1>
     <h1 class="w3-xxxlarge w3-text-red"><b>Current Activity</b></h1>
+    <div id="timer" class="timer"></div>
     <hr style="width:50px;border:5px solid red;float:left;" class="w3-round">
   </div>
 
   <!-- Table -->
 <button class="button button1 disabled" disabled form="activity_inputs" id="saveButton">Save Draft</button>    <!-- to can re-edite the activity and timer stop -->
-<button class="button button2 disabled" disabled id="startButton" onclick="change()">Start Activity</button> <!-- start timer again -->
-<button class="button button3 disabled" disabled id="endActivityButton">End Activity</button> <!-- end timer and close activity, edite not allowed -->
-<button class="button button4 disabled" disabled id="endTaskButton">End Task</button> <!-- add new activity for this task id not allowed -->
+<button class="button button2 disabled" disabled id="startButton" onclick="change()" form="activity_inputs" name="action" value="startActivity">Start Activity</button> <!-- start timer again -->
+<button class="button button3 disabled" disabled id="endActivityButton" form="activity_inputs" name="action" value="endActivity">End Activity</button> <!-- end timer and close activity, edite not allowed -->
+<button class="button button4 disabled" disabled id="endTaskButton" form="activity_inputs" name="action" value="endTask">End Task</button> <!-- add new activity for this task id not allowed -->
 <button class="add_delete" id="newActivityButton" form="new_activity"><i class="fa fa-fw fa-plus"></i>New Activity</button> <!-- add new activity for same task id -->
 <button class="add_delete" id="changeActivityButton" onclick="showAndHide()"><i class="fa fa-fw fa-exchange"></i>Change Activity</button> <!-- view or edite actvity -->
 
@@ -98,7 +99,9 @@ body {font-size:16px;}
     <select class="mm" form="activity_inputs" id="task_id" name="task_id">
       <option value="" disabled selected class="mm" id="default_task">Choose your task</option>
       @foreach ($tasks as $task)
-        <option value="{{$task->id}}" id="task_{{$task->id}}" class="cars">{{$task->id}} {{$task->title}}</option>  
+        <option value="{{$task->id}}" id="task_{{$task->id}}" class="cars" @if ($task->ended)
+            disabled
+        @endif>{{$task->id}} {{$task->title}}</option>  
       @endforeach
     </select>
   </div>

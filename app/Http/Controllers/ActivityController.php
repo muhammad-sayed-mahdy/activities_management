@@ -34,6 +34,11 @@ class ActivityController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->has('task_id') && Task::find($request['task_id'])->ended) {
+            return redirect('/')->withErrors([
+                'activity' => 'This task has already ended and cannot add a new activity for it'
+            ]);
+        }
         Activity::create();
         return redirect('/');
     }
@@ -56,8 +61,10 @@ class ActivityController extends Controller
         if ($activity->ended_at != null) {
             return redirect('/')->withErrors(['activity' => 'This activity has already ended and cannot be updated']);
         }
-        if ($activity->task != null && $activity->task->ended) {
-            return redirect('/')->withErrors(['activity' => 'The associated task has already ended and cannot be updated']);
+        if ($request->has('task_id') && Task::find($request['task_id'])->ended) {
+            return redirect('/')->withErrors([
+                'activity' => 'This task has already ended and cannot add a new activity for it'
+            ]);
         }
 
         $activity->update($validated);
@@ -70,6 +77,21 @@ class ActivityController extends Controller
                     'name' => $file->getClientOriginalName()
                 ]);
             }
+        }
+
+        if ($request->has('action')) {
+            if ($request['action'] == 'startActivity') {
+                $activity->started_at = now();
+            } elseif ($request['action'] == 'endActivity') {
+                if ($activity->started_at == null)
+                    return redirect('/')->withErrors([
+                        'activity' => "The activity hasn't started yet and cannot be ended"
+                    ]);
+                $activity->ended_at = now();
+            } elseif ($request['action'] == 'endTask') {
+                $activity->task->ended = true;
+            }
+            $activity->save();
         }
         return redirect('/');
     }

@@ -21,24 +21,41 @@ document.getElementById("change_activity").addEventListener('click', function (e
         Http.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
                 const response = JSON.parse(Http.responseText);
+                const saveButton = document.getElementById('saveButton');
+                const startButton = document.getElementById('startButton');
+                const endButton = document.getElementById('endActivityButton');
+                // show timer if activity is started
+                document.getElementById("timer").innerHTML = "";
                 
-                // toogle the buttons disability
-                const buttons = [
-                    document.getElementById('saveButton'),
-                    document.getElementById('startButton'),
-                    document.getElementById('endActivityButton')
-                ];
-                if (response['ended_at'] == null) {
-                    for (let button of buttons) {
-                        button.classList.remove('disabled');
-                        button.disabled = false;
+                if (response['started_at'] != null) {
+                    if (response['ended_at'] != null) {
+                        const seconds = Math.floor(((new Date(response['ended_at']).getTime())
+                            - (new Date(response['started_at']).getTime())) / 1000);
+                        showTime(seconds);
+
+                        disableButton(saveButton);
+                        disableButton(startButton);
+                        disableButton(endButton);
+                    } else {
+                        let seconds = Math.floor(((new Date().getTime())
+                            - (new Date(response['started_at']).getTime())) / 1000);
+                        
+                        // count up timer
+                        setInterval(() => {
+                            seconds++;
+                            showTime(seconds);
+                        }, 1000);
+
+                        enableButton(saveButton);
+                        enableButton(startButton);
+                        enableButton(endButton);
                     }
                 } else {
-                    for (let button of buttons) {
-                        button.classList.add('disabled');
-                        buttons.disabled = true;
-                    }
+                    enableButton(saveButton);
+                    enableButton(startButton);
+                    disableButton(endButton);
                 }
+
 
                 // show the selected task and customer
                 const task = document.getElementById('task_'+response['task_id']);
@@ -162,6 +179,29 @@ function removeAttachments(evt) {
         });
     } 
     button.parentElement.remove();
+}
+
+function showTime(totalSeconds) {
+    let hour = Math.floor(totalSeconds /3600);
+    let minute = Math.floor((totalSeconds - hour*3600)/60);
+    let seconds = totalSeconds - (hour*3600 + minute*60);
+    if(hour < 10)
+        hour = "0"+hour;
+    if(minute < 10)
+        minute = "0"+minute;
+    if(seconds < 10)
+        seconds = "0"+seconds;
+    document.getElementById("timer").innerHTML = hour + ":" + minute + ":" + seconds;
+}
+
+function enableButton(button) {
+    button.classList.remove('disabled');
+    button.disabled = false;   
+}
+
+function disableButton(button) {
+    button.classList.add('disabled');
+    button.disabled = true;
 }
 
 // Modal Image Gallery
