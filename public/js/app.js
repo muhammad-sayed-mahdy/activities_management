@@ -29,29 +29,29 @@ document.getElementById("change_activity").addEventListener('click', function (e
                     document.getElementById('endActivityButton')
                 ];
                 if (response['ended_at'] == null) {
-                    for (const button of buttons) {
+                    for (let button of buttons) {
                         button.classList.remove('disabled');
                         button.disabled = false;
                     }
                 } else {
-                    for (const button of buttons) {
+                    for (let button of buttons) {
                         button.classList.add('disabled');
                         buttons.disabled = true;
                     }
                 }
 
                 // show the selected task and customer
-                const $task = document.getElementById('task_'+response['task_id']);
-                if ($task != null) {
-                    $task.selected = true;
+                const task = document.getElementById('task_'+response['task_id']);
+                if (task != null) {
+                    task.selected = true;
                     toggleEndTaskButton(response['task_id']);
                 }
                 else {
                     document.getElementById('default_task').selected = true;
                 }
-                const $customer = document.getElementById('customer_'+response['customer_id']);
-                if ($customer != null)
-                    $customer.selected = true;
+                const customer = document.getElementById('customer_'+response['customer_id']);
+                if (customer != null)
+                    customer.selected = true;
                 else
                     document.getElementById('default_customer').selected = true;
 
@@ -59,8 +59,12 @@ document.getElementById("change_activity").addEventListener('click', function (e
                 document.getElementById('title').value = response['title'];
                 document.getElementById('description').textContent = response['description'];
                 document.getElementById('points').textContent = response['points'];
+
+                addAttachments(response['attachments'], true);
             }
         }
+        const uploadInfo = document.getElementById('upload_info');
+        uploadInfo.className = "hidden";
         showAndHide();
     }
 });
@@ -90,6 +94,74 @@ function toggleEndTaskButton(taskId) {
             }
         }
     }
+}
+
+// add attachments names with remove buttons
+function addAttachments(files, removeOld=false) {
+    const attachmentsArea = document.getElementById('attachments_area');
+    const fragment = document.createDocumentFragment();
+    for (const file of files) {
+        const div = document.createElement('div');
+
+        // the file is sent from the backend
+        if ('id' in file) {
+            const link = document.createElement('a');
+            link.href = "/attachments?id="+file['id'];
+            link.textContent = file['name'];
+            div.appendChild(link);
+        } else {    // the file is still in the frontend and not yet uploaded
+            const label = document.createElement('label');
+            label.textContent = file['name'];
+            div.appendChild(label);
+        }
+
+        const button = document.createElement('button');
+        button.classList.add('remove_button');
+        const iElement = document.createElement('i');
+        iElement.className = "fa fa-fw fa-minus-circle remove_icon";
+        button.appendChild(iElement);
+
+        
+        if ('id' in file) {
+            button.value = file['id'];
+        }
+        button.addEventListener('click', removeAttachments);
+        div.appendChild(button);
+        
+        fragment.appendChild(div);
+    }
+    if (removeOld) {
+        attachmentsArea.innerHTML = "";
+        const attachments = document.getElementById('attachments');
+        attachments.value = ""; // remove all unuploaded files
+    } else {
+        // remove children that are not actually uploaded
+        for (let child of attachmentsArea.children) {
+            if (!child.lastChild.hasAttribute('value'))
+                attachmentsArea.removeChild(child);
+        }
+    }
+    attachmentsArea.appendChild(fragment);
+}
+
+document.getElementById('attachments').addEventListener('change', function(evt){
+    const files = document.getElementById('attachments').files;
+    addAttachments(files);
+    const info = document.getElementById('upload_info');
+    info.className = "is_danger";
+});
+
+function removeAttachments(evt) {
+    let button = evt.target;
+    if (button.nodeName == 'I')
+        button = button.parentElement;
+    // the button has already uploaded
+    if (button.hasAttribute('value')) {
+        axios.delete('/attachments', {params:{id:button.value}}).catch(function (error) {
+            console.error(error);
+        });
+    } 
+    button.parentElement.remove();
 }
 
 // Modal Image Gallery

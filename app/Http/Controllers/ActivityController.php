@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Activity;
+use App\Attachment;
 use App\Customer;
 use App\Task;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class ActivityController extends Controller
              return response($validator->errors(), 400);
 
         if ($request->has('activityId'))
-            return Activity::find($request['activityId']);
+            return Activity::with('attachments:activity_id,id,name')->find($request['activityId']);
         if ($request->has('taskId'))
             return Task::find($request['taskId']);
 
@@ -45,7 +46,9 @@ class ActivityController extends Controller
             'customer_id' => 'nullable|integer|exists:customers,id',
             'title' => 'nullable|string',
             'description' => 'nullable|string',
-            'points' => 'nullable|string'
+            'points' => 'nullable|string',
+            'attachments' => 'array',
+            'attachments.*' => 'file'
         ]);
         $validated['title'] = request('title', 'New Activity');
 
@@ -58,6 +61,16 @@ class ActivityController extends Controller
         }
 
         $activity->update($validated);
+        if ($request->has('attachments')) {
+            foreach ($request['attachments'] as $file) {
+                $path = $file->store('attachments');
+                Attachment::create([
+                    'path' => $path,
+                    'activity_id' => $activity->id,
+                    'name' => $file->getClientOriginalName()
+                ]);
+            }
+        }
         return redirect('/');
     }
 

@@ -19,3 +19,7 @@ Route::get('/', 'ActivityController@show');
 Route::post('/', 'ActivityController@store');
 
 Route::put('/', 'ActivityController@update');
+
+Route::get('/attachments', 'AttachmentController@show');
+
+Route::delete('/attachments', 'AttachmentController@destroy');

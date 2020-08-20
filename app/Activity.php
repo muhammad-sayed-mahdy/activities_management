@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Activity extends Model
 {
-    protected $guarded = ['id', 'started_at', 'ended_at'];
+    protected $guarded = ['id', 'started_at', 'ended_at', 'created_at', 'updated_at'];
 
     public function customer()
     {

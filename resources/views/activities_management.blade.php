@@ -13,6 +13,9 @@ body {font-size:16px;}
 .w3-half img{margin-bottom:-6px;margin-top:16px;opacity:0.8;cursor:pointer}
 .w3-half img:hover{opacity:1}
 </style>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
 <body>
 
 <!-- Sidebar/menu -->
@@ -83,6 +86,10 @@ body {font-size:16px;}
   <p class="is_danger">{{$message}}</p>
 @enderror
 
+@error('attachments')
+  <p class="is_danger">{{$message}}</p>
+@enderror
+
   <div>
       <h3>Select Task</h3>
       @error('task_id')
@@ -113,7 +120,7 @@ body {font-size:16px;}
     @csrf
   </form>
 
- <form action="/" method="POST" id="activity_inputs">
+ <form action="/" method="POST" id="activity_inputs" enctype="multipart/form-data">
   @csrf
   @method('PUT')
   <h3 for="title" >Activity Title</h3>
@@ -134,17 +141,14 @@ body {font-size:16px;}
 </form>
 
 <div style="margin-top:20px;padding-right:58px">
-<button><i class="fa fa-fw fa-cloud-upload" style="font-size:20px;"></i>Upload Attachments</button>
+  <input type="file" class="hidden" name="attachments[]" id="attachments" form="activity_inputs" multiple>
+  <label for="attachments" class="custom-file-upload"><i class="fa fa-fw fa-cloud-upload" style="font-size:20px;"></i>Upload Attachments</label>
 </div>
 
-    <div>
-        <label>attachment1.png</label>
-        <button style="background-color:Transparent;border: none;cursor:default;"><i class="fa fa-fw fa-minus-circle" style="font-size:20px;color:red;"></i></button>
-    </div>
-    <div>
-        <label>attachment2.txt</label>
-        <button style="background-color:Transparent;border: none;cursor:default;"><i class="fa fa-fw fa-minus-circle" style="font-size:20px;color:red;"></i></button>
-    </div>
+  <div id="attachments_area">
+  </div>
+
+  <p class="hidden" id="upload_info"><i class="fa fa-info-circle"></i> Save Draft to complete uploading attachments</p>
 <!-- End page content -->
 </div>
 
